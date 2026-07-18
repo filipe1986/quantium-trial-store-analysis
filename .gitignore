@@ -1,0 +1,16 @@
+# Virtual Environment
+venv/
+.venv/
+ENV/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoint
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+EOF
