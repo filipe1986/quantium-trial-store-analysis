@@ -13,4 +13,9 @@ __pycache__/
 
 # OS files
 .DS_Store
+
+# raw data
+purchase_behaviour.csv
+qvi_data.csv
+
 EOF

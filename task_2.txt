@@ -1,0 +1,20 @@
+Task 2
+
+Julia has now outlined our second deliverable, which will look at the effect of product layouts in purchase bahavior and sales.
+
+Julia’s selected three stores which have trialed the new layout for a chips category: Store 77. 86 and 88. The trial period was from the start of February 2019 to the end of April 2019.
+To mesure the impact of the new store layouts on sales, during the period we first need to select a control store from the data set. As you know from task one, we have data from July 2018 to June 2019. So we can use the data we’ve previously prepared.
+When looking for a control store, we’ll need to look at stores that have similar performance to the trial store.
+Let’s consider:
+    • monthly overall sales revenue;
+    • monthly number of customers;
+    • the monthly number of transactions per customer.
+      
+So be sure to create these metrics at a monthly store level. Making sure to only consider stores that have sales every month over July 2018 to June 2019.
+Use your analysis based on the metrics above to determine a suitable control store. We will then need to rank how similar each potential control store is to trial store.
+We can do this by working out either how correlated the store performances are, or a combination metric that considers how different each potential control store is to the trial store in every month. Once you have selected control stores for each of the trial stores, assess the impact of the trial on sales.
+We will need to check if thee trial stores have sifnificantly different results to the control stores.
+Consider if you can visualize this through graphs. You’ll notice I’ve sent another follow up email which will help you break down the task. So please have a read through it before you get started.
+We’ll need to illustrate our findings and final recommendations to Julia, so please have a go at visualizing your analysis.
+
+
