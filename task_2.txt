@@ -13,7 +13,7 @@ Let’s consider:
 So be sure to create these metrics at a monthly store level. Making sure to only consider stores that have sales every month over July 2018 to June 2019.
 Use your analysis based on the metrics above to determine a suitable control store. We will then need to rank how similar each potential control store is to trial store.
 We can do this by working out either how correlated the store performances are, or a combination metric that considers how different each potential control store is to the trial store in every month. Once you have selected control stores for each of the trial stores, assess the impact of the trial on sales.
-We will need to check if thee trial stores have sifnificantly different results to the control stores.
+We will need to check if three trial stores have sifnificantly different results to the control stores.
 Consider if you can visualize this through graphs. You’ll notice I’ve sent another follow up email which will help you break down the task. So please have a read through it before you get started.
 We’ll need to illustrate our findings and final recommendations to Julia, so please have a go at visualizing your analysis.
 
