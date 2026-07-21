@@ -70,7 +70,7 @@ plot_df = trial_data.merge(
 plot_df['month'] = plot_df['month'].astype(str)
 
 # Plot
-fig, ax = plt.subplots(figsize=(12, 6))
+fig, ax = plt.subplots(figsize=(10, 5))
 
 sns.lineplot(
     data=plot_df, 
