@@ -2,9 +2,12 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import warnings
+warnings.filterwarnings("ignore")
+
 
 st.set_page_config(page_title="Quantium Trial Store Analysis", layout="wide")
-st.title("📊 Quantium Trial Store Performance Dashboard")
+st.title(" Quantium Trial Store Performance Dashboard")
 st.markdown("Interactive charts for trial stores 77, 86, and 88 vs. their control stores.")
 
 # Load data
@@ -63,11 +66,32 @@ plot_df = trial_data.merge(
 )
 
 # Plot
-fig, ax = plt.subplots(figsize=(12, 6))
-sns.lineplot(data=plot_df, x='month', y=selected_metric, label=f'Trial Store {selected_trial}', marker='o', ax=ax)
-sns.lineplot(data=plot_df, x='month', y='scaled_' + selected_metric, label=f'Scaled Control Store {control_store}', marker='s', ax=ax)
 
-ax.axvline(pd.Period('2019-02'), color='red', linestyle='--', label='Trial Period Start')
+# Convert month to string/datetime for better plotting
+plot_df['month'] = plot_df['month'].astype(str)
+
+# Plot
+fig, ax = plt.subplots(figsize=(12, 6))
+
+sns.lineplot(
+    data=plot_df, 
+    x='month', 
+    y=selected_metric, 
+    label=f'Trial Store {selected_trial}', 
+    marker='o', 
+    ax=ax
+)
+
+sns.lineplot(
+    data=plot_df, 
+    x='month', 
+    y='scaled_' + selected_metric, 
+    label=f'Scaled Control Store {control_store}', 
+    marker='s', 
+    ax=ax
+)
+
+ax.axvline('2019-02', color='red', linestyle='--', label='Trial Period Start')
 ax.set_title(f"{selected_metric_label} - Trial Store {selected_trial} vs Control {control_store}")
 ax.set_ylabel(selected_metric_label)
 ax.set_xlabel("Month")
@@ -75,12 +99,5 @@ ax.legend()
 plt.xticks(rotation=45)
 st.pyplot(fig)
 
-# Show uplift table
-st.subheader("Uplift During Trial Period")
-trial_period = plot_df[plot_df['month'] >= '2019-02']
-trial_period['uplift_pct'] = ((trial_period[selected_metric] - trial_period['scaled_' + selected_metric]) / 
-                              trial_period['scaled_' + selected_metric]) * 100
-st.dataframe(trial_period[['month', selected_metric, 'scaled_' + selected_metric, 'uplift_pct']].round(2))
 
-st.caption("Built by Philip Vieira")
 
