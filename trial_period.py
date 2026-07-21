@@ -282,7 +282,7 @@ for k, v in control_mapping.items():
 
 df_uplift = pd.DataFrame(trial_results)
 
-print(f"\n{'==' * 18}Trial period uplift analysis{'==' * 18}")
+#print(f"\n{'==' * 18}Trial period uplift analysis{'==' * 18}")
 
 #print(df_uplift.to_string())
 '''
@@ -316,6 +316,116 @@ print(f"\n{'==' * 18}Trial period uplift analysis{'==' * 18}")
 25           88              7       monthly_txns  2019-03         170.0      174.678281   -2.678227
 26           88              7       monthly_txns  2019-04         162.0      136.977933   18.267225
 '''
+
+# charts building
+
+# seting aesthetics for clean presentation charts
+sns.set_theme(style="whitegrid")
+plt.rcParams.update({'font.size': 12})
+
+# Isolating pair data across the entire timeline
+pair_77_233 = monthly_metrics[monthly_metrics['store_nbr'].isin([77, 233])].copy()
+
+# ensuring month is formatted nicely for axis plotting
+pair_77_233['month_str'] = pair_77_233['month'].astype(str)
+
+# computing pre-trial scaling factors
+pre_trial_data = pair_77_233[pair_77_233['month'] < '2019-02']
+
+metrics = ['monthly_revenue', 'monthly_customers', 'monthly_txns']
+scaling_factors = {}
+
+for m in metrics:
+    trial_sum = pre_trial_data[pre_trial_data['store_nbr'] == 77][m].sum()
+    control_sum = pre_trial_data[pre_trial_data['store_nbr'] == 233][m].sum()
+    scaling_factors[m] = trial_sum / control_sum
+
+# creating a clean, scaled timeline dataframe
+df_77 = pair_77_233[pair_77_233['store_nbr'] == 77][['month_str', 'monthly_revenue', 'monthly_customers', 'monthly_txns']].copy()
+
+df_233 = pair_77_233[pair_77_233['store_nbr'] == 233][['month_str', 'monthly_revenue', 'monthly_customers', 'monthly_txns']].copy()
+
+#applying scaling to control store 233
+for m in metrics:
+    df_233[f'{m}_scaled'] = df_233[m] * scaling_factors[m]
+
+#merging into one flat dataframe for easy plotting
+df_plot_77 = pd.merge(
+    df_77,
+    df_233[['month_str', 'monthly_revenue_scaled', 'monthly_customers_scaled', 'monthly_txns_scaled']],
+).sort_values(by='month_str')
+
+'''
+=== Unified timeline dataframe (store 77 vs 233) ===
+month_str  monthly_revenue  monthly_customers  monthly_txns  monthly_revenue_scaled  monthly_customers_scaled  monthly_txns_scaled
+0   2018-07            296.8                 55            55              297.565550                 55.041801            55.041801
+1   2018-08            255.5                 48            48              292.652187                 50.964630            50.964630
+2   2018-09            225.2                 44            44              233.998916                 45.868167            45.868167
+3   2018-10            204.5                 38            38              190.085733                 36.694534            36.694534
+4   2018-11            245.3                 44            44              216.597421                 41.790997            41.790997
+'''
+
+
+def pair_chart_generate(trial_store, control_store, monthly_metrics, before_trial):
+    # 1. Calculate scaling factors
+    rev_factor = before_trial[before_trial['store_nbr'] == trial_store]['monthly_revenue'].sum() / \
+                 before_trial[before_trial['store_nbr'] == control_store]['monthly_revenue'].sum()
+
+    cust_factor = before_trial[before_trial['store_nbr'] == trial_store]['monthly_customers'].sum() / \
+                  before_trial[before_trial['store_nbr'] == control_store]['monthly_customers'].sum()
+
+    txns_factor = before_trial[before_trial['store_nbr'] == trial_store]['monthly_txns'].sum() / \
+                  before_trial[before_trial['store_nbr'] == control_store]['monthly_txns'].sum()
+
+    # 2. Isolate and scale
+    t_df = monthly_metrics[monthly_metrics['store_nbr'] == trial_store].copy()
+    c_df = monthly_metrics[monthly_metrics['store_nbr'] == control_store].copy()
+
+    t_df['month_str'] = t_df['month'].astype(str)
+    c_df['month_str'] = c_df['month'].astype(str)
+
+    c_df['monthly_revenue_scaled'] = c_df['monthly_revenue'] * rev_factor
+    c_df['monthly_customers_scaled'] = c_df['monthly_customers'] * cust_factor
+    c_df['monthly_txns_scaled'] = c_df['monthly_txns'] * txns_factor
+
+    df_plot = pd.merge(
+        t_df[['month_str', 'monthly_revenue', 'monthly_customers', 'monthly_txns']],
+        c_df[['month_str', 'monthly_revenue_scaled', 'monthly_customers_scaled', 'monthly_txns_scaled']],
+        on='month_str'
+    ).sort_values(by='month_str')
+
+    # 3. Generate the 3 charts
+    chart_configs = [
+        ('monthly_revenue', 'monthly_revenue_scaled', 'Monthly Revenue ($)', f'revenue_{trial_store}_vs_{control_store}.png'),
+        ('monthly_customers', 'monthly_customers_scaled', 'Monthly Customers', f'customers_{trial_store}_vs_{control_store}.png'),
+        ('monthly_txns', 'monthly_txns_scaled', 'Monthly Transactions', f'transactions_{trial_store}_vs_{control_store}.png')
+    ]
+
+    for actual_col, scaled_col, title_label, file_name in chart_configs:
+        plt.figure(figsize=(10, 5))
+        plt.plot(df_plot['month_str'], df_plot[actual_col], marker='o', linewidth=2.5, color='#1f77b4', label=f'Trial Store {trial_store}')
+        plt.plot(df_plot['month_str'], df_plot[scaled_col], marker='s', linestyle='--', linewidth=2, color='#ff7f0e', label=f'Control Store {control_store} (Scaled)')
+        plt.axvline(x='2019-02', color='red', linestyle=':', linewidth=2, label='Trial Start (Feb 2019)')
+        
+        plt.title(f'Store {trial_store} vs Control Store {control_store}: {title_label}', fontsize=14, fontweight='bold', pad=15)
+        plt.xlabel('Month', fontsize=11, labelpad=10)
+        plt.ylabel(title_label, fontsize=11)
+        plt.xticks(rotation=45)
+        plt.legend(loc='upper left', frameon=True)
+        plt.tight_layout()
+        plt.savefig(file_name, dpi=300, bbox_inches='tight')
+        plt.close()
+
+    print(f"Generated all charts for Pair ({trial_store}, {control_store})")
+
+pairs = [
+    (77, 233),
+    (86, 138),
+    (88,7)
+]
+
+for trial, control in pairs:
+    pair_chart_generate(trial, control, monthly_metrics, before_trial)
 
 
 
