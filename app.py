@@ -5,7 +5,6 @@ import seaborn as sns
 import warnings
 warnings.filterwarnings("ignore")
 
-
 st.set_page_config(page_title="Quantium Trial Store Analysis", layout="wide")
 st.title(" Quantium Trial Store Performance Dashboard")
 st.markdown("Interactive charts for trial stores 77, 86, and 88 vs. their control stores.")
@@ -98,6 +97,4 @@ ax.set_xlabel("Month")
 ax.legend()
 plt.xticks(rotation=45)
 st.pyplot(fig)
-
-
 
